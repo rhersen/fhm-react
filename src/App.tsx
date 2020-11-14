@@ -27,6 +27,15 @@ let population: { [columnLetter: string]: any } = {
   W: 465214,
 };
 
+function color(x: number) {
+  for (let i = 960; i >= 60; i /= 2) {
+    if (x > i) return "color" + i;
+  }
+  if (x > 20) return "color20";
+  if (x > 0) return "color1";
+  return "color0";
+}
+
 function App() {
   let data = all["Antal per dag region"];
   let header: { [columnLetter: string]: string } = data[0] as {
@@ -35,10 +44,6 @@ function App() {
   console.log(JSON.stringify(header));
   let rows: Array<{ [columnLetter: string]: any }> = data.slice(1);
   let dates = rows.map((row) => row.A.substr(0, 10));
-  let columnB = rows.map((row) => row.B) as Array<number>;
-  let columnM = rows.map((row) => row.M) as Array<number>;
-  let columnN = rows.map((row) => row.N) as Array<number>;
-  let columnU = rows.map((row) => row.U) as Array<number>;
 
   let column: { [columnLetter: string]: Array<any> } = {};
   Object.keys(population).forEach((key) => {
@@ -53,21 +58,19 @@ function App() {
         {rows.map((row, i) => (
           <tr>
             <td>{dates[i]}</td>
-            {Object.keys(population).map((key) => (
-              <td>
-                {Math.round(
-                  (column[key].slice(i - 13, i + 1).reduce((a, b) => a + b, 0) /
-                    population[key]) *
-                    1e5
-                )}
-              </td>
-            ))}
+            {Object.keys(population).map((key) => {
+              let x =
+                (column[key].slice(i - 13, i + 1).reduce((a, b) => a + b, 0) /
+                  population[key]) *
+                1e5;
+              return <td className={color(x)}>{Math.round(x)}</td>;
+            })}
           </tr>
         ))}
         <tr>
           <th>{header.A}</th>
           {Object.keys(population).map((key) => (
-            <th>{header[key]}</th>
+            <th>{header[key].substr(0, 7)}</th>
           ))}
         </tr>
       </table>
