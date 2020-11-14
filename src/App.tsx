@@ -35,27 +35,23 @@ function App() {
   let column = extractColumns(rows);
 
   return (
-      <div className="App">
-        <table>
-          {rows.map(tableRow)}
-          <tr>
-            <th>{header.A}</th>
-            {Object.keys(population).map(columnHeader)}
-          </tr>
-        </table>
-      </div>
+    <div className="table">
+      {rows.map(tableRow)}
+      <span className="date" />
+      {Object.keys(population).map(columnHeader)}
+    </div>
   );
 
   function columnHeader(key: string) {
-    return <th>{header[key].substr(0, 7)}</th>;
+    return <span>{header[key]}</span>;
   }
 
   function tableRow(row: { [col: string]: number }, i: number) {
     return (
-      <tr>
-        <td>{dates[i]}</td>
+      <>
+        <span className="date">{dates[i]}</span>
         {Object.keys(population).map(tableCell)}
-      </tr>
+      </>
     );
 
     function tableCell(key: string) {
@@ -63,7 +59,7 @@ function App() {
         (column[key].slice(i - 13, i + 1).reduce(sum, 0) / population[key]) *
         1e5;
 
-      return <td className={color(x)}>{Math.round(x)}</td>;
+      return <span className={color(x)}>{Math.round(x)}</span>;
     }
   }
 }
