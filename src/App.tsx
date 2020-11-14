@@ -2,7 +2,7 @@ import "./App.css";
 import React from "react";
 import all from "./Folkhalsomyndigheten_Covid19.json";
 
-let population: { [columnLetter: string]: any } = {
+let population: { [columnLetter: string]: number } = {
   B: 10230000,
   C: 159748,
   D: 287795,
@@ -28,9 +28,7 @@ let population: { [columnLetter: string]: any } = {
 };
 
 function color(x: number) {
-  for (let i = 960; i >= 60; i /= 2) {
-    if (x > i) return "color" + i;
-  }
+  for (let i = 960; i >= 60; i /= 2) if (x > i) return "color" + i;
   if (x > 20) return "color20";
   if (x > 0) return "color1";
   return "color0";
@@ -38,18 +36,14 @@ function color(x: number) {
 
 function App() {
   let data = all["Antal per dag region"];
-  let header: { [columnLetter: string]: string } = data[0] as {
-    [columnLetter: string]: string;
-  };
+  let header = data[0] as { [columnLetter: string]: string };
   console.log(JSON.stringify(header));
   let rows: Array<{ [columnLetter: string]: any }> = data.slice(1);
   let dates = rows.map((row) => row.A.substr(0, 10));
 
-  let column: { [columnLetter: string]: Array<any> } = {};
+  let column: { [columnLetter: string]: Array<number> } = {};
   Object.keys(population).forEach((key) => {
-    column[key] = rows.map(
-      (row: { [columnLetter: string]: number }) => row[key]
-    ) as Array<any>;
+    column[key] = rows.map((row) => row[key]);
   });
 
   return (
