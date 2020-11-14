@@ -2,7 +2,7 @@ import "./App.css";
 import React from "react";
 import all from "./Folkhalsomyndigheten_Covid19.json";
 
-let population: { [columnLetter: string]: number } = {
+let population: { [col: string]: number } = {
   B: 10230000,
   C: 159748,
   D: 287795,
@@ -27,49 +27,70 @@ let population: { [columnLetter: string]: number } = {
   W: 465214,
 };
 
+function App() {
+  let data = all["Antal per dag region"];
+  let header = data[0] as { [col: string]: string };
+  let rows: Array<{ [col: string]: any }> = data.slice(1);
+  let dates = rows.map(date);
+  let column = extractColumns(rows);
+
+  return (
+      <div className="App">
+        <table>
+          {rows.map(tableRow)}
+          <tr>
+            <th>{header.A}</th>
+            {Object.keys(population).map(columnHeader)}
+          </tr>
+        </table>
+      </div>
+  );
+
+  function columnHeader(key: string) {
+    return <th>{header[key].substr(0, 7)}</th>;
+  }
+
+  function tableRow(row: { [col: string]: number }, i: number) {
+    return (
+      <tr>
+        <td>{dates[i]}</td>
+        {Object.keys(population).map(tableCell)}
+      </tr>
+    );
+
+    function tableCell(key: string) {
+      let x =
+        (column[key].slice(i - 13, i + 1).reduce(sum, 0) / population[key]) *
+        1e5;
+
+      return <td className={color(x)}>{Math.round(x)}</td>;
+    }
+  }
+}
+
+function date(row: { [col: string]: any }) {
+  return row.A.substr(0, 10);
+}
+
+function extractColumns(rows: Array<{ [p: string]: any }>) {
+  let column: { [col: string]: Array<number> } = {};
+  Object.keys(population).forEach(set);
+  return column;
+
+  function set(key: string) {
+    column[key] = rows.map((row: { [col: string]: number }) => row[key]);
+  }
+}
+
+function sum(a: number, b: number) {
+  return a + b;
+}
+
 function color(x: number) {
   for (let i = 960; i >= 60; i /= 2) if (x > i) return "color" + i;
   if (x > 20) return "color20";
   if (x > 0) return "color1";
   return "color0";
-}
-
-function App() {
-  let data = all["Antal per dag region"];
-  let header = data[0] as { [columnLetter: string]: string };
-  console.log(JSON.stringify(header));
-  let rows: Array<{ [columnLetter: string]: any }> = data.slice(1);
-  let dates = rows.map((row) => row.A.substr(0, 10));
-
-  let column: { [columnLetter: string]: Array<number> } = {};
-  Object.keys(population).forEach((key) => {
-    column[key] = rows.map((row) => row[key]);
-  });
-
-  return (
-    <div className="App">
-      <table>
-        {rows.map((row, i) => (
-          <tr>
-            <td>{dates[i]}</td>
-            {Object.keys(population).map((key) => {
-              let x =
-                (column[key].slice(i - 13, i + 1).reduce((a, b) => a + b, 0) /
-                  population[key]) *
-                1e5;
-              return <td className={color(x)}>{Math.round(x)}</td>;
-            })}
-          </tr>
-        ))}
-        <tr>
-          <th>{header.A}</th>
-          {Object.keys(population).map((key) => (
-            <th>{header[key].substr(0, 7)}</th>
-          ))}
-        </tr>
-      </table>
-    </div>
-  );
 }
 
 export default App;
