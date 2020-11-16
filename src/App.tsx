@@ -1,31 +1,7 @@
 import "./App.css";
 import React from "react";
 import fetchData from "./fetchData";
-
-let population = [
-  10230000,
-  159748,
-  287795,
-  59636,
-  287333,
-  333202,
-  130697,
-  363351,
-  245415,
-  201290,
-  250230,
-  1376659,
-  2374550,
-  297169,
-  383044,
-  282342,
-  271621,
-  245380,
-  275634,
-  1724529,
-  304634,
-  465214,
-];
+import population from "./population";
 
 function App() {
   let { headers, dates, rows } = fetchData();
