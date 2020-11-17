@@ -29,20 +29,10 @@ const regions = {
 };
 
 function App() {
-  let { headers, dates, rows } = fetchData();
+  let { rows } = fetchData();
   let regionCodes = Object.keys(regions);
   rows = rows.slice(-14);
-  return (
-    <div className="table">
-      {tableRow()}
-      <span className="date" />
-      {/*{headers.map(columnHeader)}*/}
-    </div>
-  );
-
-  function columnHeader(header: string) {
-    return <span className={header.toLowerCase()}>{header}</span>;
-  }
+  return <div className="table">{tableRow()}</div>;
 
   function tableRow() {
     return rows[0].map((value, colIndex) => tableCell(colIndex));
