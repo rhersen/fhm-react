@@ -3,39 +3,61 @@ import React from "react";
 import fetchData from "./fetchData";
 import population from "./population";
 
+const regions = {
+  SM: "Totalt_antal_fall",
+  K: "Blekinge",
+  W: "Dalarna",
+  I: "Gotland",
+  X: "Gävleborg",
+  N: "Halland",
+  Z: "Jämtland_Härjedalen",
+  F: "Jönköping",
+  H: "Kalmar",
+  G: "Kronoberg",
+  BD: "Norrbotten",
+  M: "Skåne",
+  AB: "Stockholm",
+  D: "Sörmland",
+  C: "Uppsala",
+  S: "Värmland",
+  AC: "Västerbotten",
+  Y: "Västernorrland",
+  U: "Västmanland",
+  O: "Västra_Götaland",
+  T: "Örebro",
+  E: "Östergötland",
+};
+
 function App() {
   let { headers, dates, rows } = fetchData();
-
+  let regionCodes = Object.keys(regions);
+  rows = rows.slice(-14);
   return (
     <div className="table">
-      {rows.map(tableRow)}
+      {tableRow()}
       <span className="date" />
-      {headers.map(columnHeader)}
+      {/*{headers.map(columnHeader)}*/}
     </div>
   );
 
   function columnHeader(header: string) {
-    return <span>{header}</span>;
+    return <span className={header.toLowerCase()}>{header}</span>;
   }
 
-  function tableRow(row: number[], rowIndex: number) {
-    return (
-      <>
-        <span className="date">{dates[rowIndex]}</span>
-        {row.map((value, colIndex) => tableCell(colIndex, rowIndex))}
-      </>
-    );
+  function tableRow() {
+    return rows[0].map((value, colIndex) => tableCell(colIndex));
 
-    function tableCell(colIndex: number, rowIndex: number) {
+    function tableCell(colIndex: number) {
       let x =
-        (rows
-          .slice(rowIndex - 13, rowIndex + 1)
-          .map((row) => row[colIndex])
-          .reduce(sum, 0) /
+        (rows.map((row) => row[colIndex]).reduce(sum, 0) /
           population[colIndex]) *
         1e5;
 
-      return <span className={color(x)}>{Math.round(x)}</span>;
+      return (
+        <span className={color(x) + " " + regionCodes[colIndex]}>
+          {Math.round(x)}
+        </span>
+      );
     }
   }
 }

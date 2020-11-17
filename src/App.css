@@ -1,6 +1,122 @@
 .table {
   display: grid;
-  grid-template-columns: max-content repeat(22, 1fr);
+  height: 100vh;
+  align-items: stretch;
+  grid-template-rows: [BD] 2fr [AC] 1fr [Z] 2fr [W] 2fr [C] 1fr [D] 1fr [E] 1fr [F] 1fr [N] 1fr [M] 1fr [K] 1fr [end];
+  grid-template-columns: [O] 1fr [S] 2fr [G] 1fr [K] 2fr [H] 2fr [AB] 2fr [I] 1fr [end];
+}
+
+span {
+  border: white 1px solid;
+}
+
+.SM {
+  display: none;
+}
+
+.K {
+  grid-column: K/AB;
+  grid-row: M;
+}
+
+.W {
+  grid-column: S/H;
+  grid-row: W;
+}
+
+.I {
+  grid-column: I;
+  grid-row: F;
+}
+
+.X {
+  grid-column: H;
+  grid-row: W;
+}
+
+.N {
+  grid-column: S;
+  grid-row: N;
+}
+
+.Z {
+  grid-column: S/H;
+  grid-row: Z;
+}
+
+.F {
+  grid-column: K/H;
+  grid-row: F;
+}
+
+.H {
+  grid-column: H;
+  grid-row: F/M;
+}
+
+.G {
+  grid-column: G/H;
+  grid-row: N;
+}
+
+.BD {
+  grid-column: K/end;
+  grid-row: BD;
+}
+
+.M {
+  grid-column: S/K;
+  grid-row: M/end;
+}
+
+.AB {
+  grid-column: AB;
+  grid-row: D;
+}
+
+.D {
+  grid-column: H;
+  grid-row: D;
+}
+
+.C {
+  grid-column: AB;
+  grid-row: C;
+}
+
+.S {
+  grid-column: S/K;
+  grid-row: C/E;
+}
+
+.AC {
+  grid-column: G/I;
+  grid-row: AC;
+}
+
+.Y {
+  grid-column: H;
+  grid-row: Z;
+}
+
+.U {
+  grid-column: H;
+  grid-row: C;
+}
+
+.O {
+  grid-column: O/K;
+  grid-row: E/N;
+}
+
+.T {
+  grid-column: K/H;
+  grid-row: C/E;
+}
+
+.E {
+  grid-column: K/AB;
+  grid-row: E;
 }
 
 .table span {
