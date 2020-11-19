@@ -1,41 +1,72 @@
 import "./App.css";
 import React from "react";
-import fetchData from "./fetchData";
 import population from "./population";
 
-function App() {
-  let { headers, dates, rows } = fetchData();
-
-  return (
-    <div className="table">
-      {rows.map(tableRow)}
-      <span className="date" />
-      {headers.map(columnHeader)}
-    </div>
-  );
-
-  function columnHeader(header: string) {
-    return <span>{header}</span>;
+class App extends React.Component<
+  {},
+  {
+    headers: string[];
+    dates: string[];
+    rows: number[][];
+  }
+> {
+  constructor(props: {}) {
+    super(props);
+    this.state = {
+      headers: [],
+      dates: [],
+      rows: [],
+    };
   }
 
-  function tableRow(row: number[], rowIndex: number) {
+  componentDidMount() {
+    fetch("/.netlify/functions/fauna")
+      .then((faunaResp) => faunaResp.json())
+      .then((json) => {
+        let cases = json["Antal per dag region"] as { [col: string]: any }[];
+        let objects: { [col: string]: any }[] = cases.slice(1);
+        this.setState({
+          headers: Object.values(cases[0]).slice(1) as string[],
+          dates: objects.map((row) => row.A.substr(0, 10)),
+          rows: objects.map((a) => Object.values(a).slice(1)),
+        });
+      });
+  }
+
+  render() {
+    let { headers, dates, rows } = this.state;
+
     return (
-      <>
-        <span className="date">{dates[rowIndex]}</span>
-        {row.map((value, colIndex) => tableCell(colIndex, rowIndex))}
-      </>
+      <div className="table">
+        {rows.map(tableRow)}
+        <span className="date" />
+        {headers.map(columnHeader)}
+      </div>
     );
 
-    function tableCell(colIndex: number, rowIndex: number) {
-      let x =
-        (rows
-          .slice(rowIndex - 13, rowIndex + 1)
-          .map((row) => row[colIndex])
-          .reduce(sum, 0) /
-          population[colIndex]) *
-        1e5;
+    function columnHeader(header: string) {
+      return <span>{header}</span>;
+    }
 
-      return <span className={color(x)}>{Math.round(x)}</span>;
+    function tableRow(row: number[], rowIndex: number) {
+      return (
+        <>
+          <span className="date">{dates[rowIndex]}</span>
+          {row.map((value, colIndex) => tableCell(colIndex, rowIndex))}
+        </>
+      );
+
+      function tableCell(colIndex: number, rowIndex: number) {
+        let x =
+          (rows
+            .slice(rowIndex - 13, rowIndex + 1)
+            .map((row) => row[colIndex])
+            .reduce(sum, 0) /
+            population[colIndex]) *
+          1e5;
+
+        return <span className={color(x)}>{Math.round(x)}</span>;
+      }
     }
   }
 }

@@ -18,7 +18,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "update-data": "convert-excel-to-json --sourceFile=\"Folkhalsomyndigheten_Covid19.xlsx\" > src/Folkhalsomyndigheten_Covid19.json"
+    "postbuild": "cd functions/fauna && yarn install"
   },
   "eslintConfig": {
     "extends": [
