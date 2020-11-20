@@ -14,7 +14,6 @@ exports.handler = async function ({ httpMethod, body }) {
   try {
     if (httpMethod === "GET") {
       const response = await lastRead();
-      console.log(response);
       if (!response.data)
         return { statusCode: response.requestResult.statusCode };
 
