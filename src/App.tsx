@@ -59,11 +59,12 @@ class App extends React.Component<
       function tableCell(colIndex: number, rowIndex: number) {
         let x =
           (rows
-            .slice(rowIndex - 13, rowIndex + 1)
+            .slice(rowIndex - 6, rowIndex + 1)
             .map((row) => row[colIndex])
             .reduce(sum, 0) /
-            population[colIndex]) *
-          1e5;
+            population[colIndex] /
+            7) *
+          1e6;
 
         return <span className={color(x)}>{Math.round(x)}</span>;
       }
