@@ -1,31 +1,17 @@
 import "./App.css";
-import React from "react";
+import React, { FC, useEffect, useState } from "react";
 import population from "./population";
 
-class App extends React.Component<
-  {},
-  {
-    headers: string[];
-    dates: string[];
-    rows: number[][];
-  }
-> {
-  constructor(props: {}) {
-    super(props);
-    this.state = {
-      headers: [],
-      dates: [],
-      rows: [],
-    };
-  }
+export const App: FC = () => {
+  const [headers, setHeaders] = useState<string[]>([]);
+  const [dates, setDates] = useState<string[]>([]);
+  const [rows, setRows] = useState<number[][]>([]);
 
-  componentDidMount() {
+  useEffect(() => {
     fetch("/.netlify/functions/fauna").then((faunaResp) => {
       if (!faunaResp.ok) {
         return faunaResp.text().then((error) => {
-          this.setState({
-            headers: [error.toString()],
-          });
+          setHeaders([error.toString()]);
         });
       }
 
@@ -36,69 +22,61 @@ class App extends React.Component<
           }[] = json["Antal per dag region"];
           let [, ...headers] = Object.values(headerObject);
 
-          this.setState({
-            headers,
-            dates: dataObjects.map((obj) => obj.A.substr(0, 10)),
-            rows: dataObjects.map(Object.values).map(([, ...row]) => row),
-          });
+          setHeaders(headers);
+          setDates(dataObjects.map((obj) => obj.A.substr(0, 10)));
+          setRows(dataObjects.map(Object.values).map(([, ...row]) => row));
         },
         (error) => {
-          this.setState({
-            headers: [error.toString()],
-          });
+          setHeaders([error.toString()]);
         }
       );
     });
+  }, []);
+
+  return (
+    <div className="table">
+      {rows.map(tableRow)}
+      <span className="date" />
+      {headers.map(columnHeader)}
+    </div>
+  );
+
+  function columnHeader(header: string) {
+    return <span>{header}</span>;
   }
 
-  render() {
-    let { headers, dates, rows } = this.state;
-
+  function tableRow(row: number[], rowIndex: number) {
     return (
-      <div className="table">
-        {rows.map(tableRow)}
-        <span className="date" />
-        {headers.map(columnHeader)}
-      </div>
+      <>
+        <span className="date">{dates[rowIndex]}</span>
+        {row.map((value, colIndex) => tableCell(colIndex, rowIndex))}
+      </>
     );
 
-    function columnHeader(header: string) {
-      return <span>{header}</span>;
-    }
+    function tableCell(colIndex: number, rowIndex: number) {
+      let x =
+        (rows
+          .slice(rowIndex - 6, rowIndex + 1)
+          .map((row) => row[colIndex])
+          .reduce(sum, 0) /
+          population[colIndex] /
+          7) *
+        1e6;
 
-    function tableRow(row: number[], rowIndex: number) {
-      return (
-        <>
-          <span className="date">{dates[rowIndex]}</span>
-          {row.map((value, colIndex) => tableCell(colIndex, rowIndex))}
-        </>
-      );
+      return <span className={color(x)}>{Math.round(x)}</span>;
 
-      function tableCell(colIndex: number, rowIndex: number) {
-        let x =
-          (rows
-            .slice(rowIndex - 6, rowIndex + 1)
-            .map((row) => row[colIndex])
-            .reduce(sum, 0) /
-            population[colIndex] /
-            7) *
-          1e6;
+      function sum(a: number, b: number) {
+        return a + b;
+      }
 
-        return <span className={color(x)}>{Math.round(x)}</span>;
+      function color(x: number) {
+        for (let i = 960; i >= 60; i /= 2) if (x > i) return "color" + i;
+        if (x > 20) return "color20";
+        if (x > 0) return "color1";
+        return "color0";
       }
     }
   }
-}
-
-function sum(a: number, b: number) {
-  return a + b;
-}
-
-function color(x: number) {
-  for (let i = 960; i >= 60; i /= 2) if (x > i) return "color" + i;
-  if (x > 20) return "color20";
-  if (x > 0) return "color1";
-  return "color0";
-}
+};
 
 export default App;
