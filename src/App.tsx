@@ -3,15 +3,18 @@ import React, { FC, useEffect, useState } from "react";
 import population from "./population";
 
 export const App: FC = () => {
+  const [status, setStatus] = useState<string>("idle");
   const [headers, setHeaders] = useState<string[]>([]);
   const [dates, setDates] = useState<string[]>([]);
   const [rows, setRows] = useState<number[][]>([]);
 
   useEffect(() => {
+    setStatus("loading");
     fetch("/.netlify/functions/fauna").then((faunaResp) => {
+      setStatus(`loaded ${faunaResp.ok}`);
       if (!faunaResp.ok) {
         return faunaResp.text().then((error) => {
-          setHeaders([error.toString()]);
+          setStatus(error.toString());
         });
       }
 
@@ -27,18 +30,21 @@ export const App: FC = () => {
           setRows(dataObjects.map(Object.values).map(([, ...row]) => row));
         },
         (error) => {
-          setHeaders([error.toString()]);
+          setStatus(error.toString());
         }
       );
     });
   }, []);
 
   return (
-    <div className="table">
-      {rows.map(tableRow)}
-      <span className="date" />
-      {headers.map(columnHeader)}
-    </div>
+    <>
+      <div className="status">{status}</div>
+      <div className="table">
+        {rows.map(tableRow)}
+        <span className="date" />
+        {headers.map(columnHeader)}
+      </div>
+    </>
   );
 
   function columnHeader(header: string) {
