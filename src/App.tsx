@@ -20,13 +20,20 @@ class App extends React.Component<
   }
 
   componentDidMount() {
-    fetch("/.netlify/functions/fauna")
-      .then((faunaResp) => faunaResp.json())
-      .then(
+    fetch("/.netlify/functions/fauna").then((faunaResp) => {
+      if (!faunaResp.ok) {
+        return faunaResp.text().then((error) => {
+          this.setState({
+            headers: [error.toString()],
+          });
+        });
+      }
+
+      return faunaResp.json().then(
         (json) => {
-          let [headerObject, ...dataObjects]: { [col: string]: any }[] = json[
-            "Antal per dag region"
-          ];
+          let [headerObject, ...dataObjects]: {
+            [col: string]: any;
+          }[] = json["Antal per dag region"];
           let [, ...headers] = Object.values(headerObject);
 
           this.setState({
@@ -36,12 +43,12 @@ class App extends React.Component<
           });
         },
         (error) => {
-          console.log(error);
           this.setState({
             headers: [error.toString()],
           });
         }
       );
+    });
   }
 
   render() {
