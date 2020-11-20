@@ -2,7 +2,6 @@ const faunadb = require("faunadb");
 
 const q = faunadb.query;
 
-console.log(process.env.FAUNADB_SECRET);
 const faunaClient = new faunadb.Client({
   secret: process.env.FAUNADB_SECRET,
 });
@@ -12,7 +11,6 @@ async function lastRead() {
 }
 
 exports.handler = async function ({ httpMethod, body }) {
-  console.log(httpMethod, body);
   try {
     if (httpMethod === "GET") {
       const response = await lastRead();
