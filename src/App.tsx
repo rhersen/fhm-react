@@ -23,12 +23,15 @@ class App extends React.Component<
     fetch("/.netlify/functions/fauna")
       .then((faunaResp) => faunaResp.json())
       .then((json) => {
-        let cases = json["Antal per dag region"] as { [col: string]: any }[];
-        let objects: { [col: string]: any }[] = cases.slice(1);
+        let [headerObject, ...dataObjects]: { [col: string]: any }[] = json[
+          "Antal per dag region"
+        ];
+        let [, ...headers] = Object.values(headerObject);
+
         this.setState({
-          headers: Object.values(cases[0]).slice(1) as string[],
-          dates: objects.map((row) => row.A.substr(0, 10)),
-          rows: objects.map((a) => Object.values(a).slice(1)),
+          headers,
+          dates: dataObjects.map((obj) => obj.A.substr(0, 10)),
+          rows: dataObjects.map(Object.values).map(([, ...row]) => row),
         });
       });
   }

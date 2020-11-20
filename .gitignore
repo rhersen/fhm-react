@@ -24,3 +24,7 @@ yarn-error.log*
 
 # Local Netlify folder
 .netlify
+
+/.idea
+/functions/fauna/node_modules
+/src/react-app-env.d.ts
