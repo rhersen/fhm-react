@@ -6,7 +6,8 @@ export const App: FC = () => {
   const [status, setStatus] = useState<string>("idle");
   const [headers, setHeaders] = useState<string[]>([]);
   const [dates, setDates] = useState<string[]>([]);
-  const [rows, setRows] = useState<number[][]>([]);
+  const [rolling7, setRolling7] = useState<number[][]>([]);
+  const [selected, setSelected] = useState<number>(-1);
 
   useEffect(() => {
     setStatus("loading");
@@ -25,9 +26,23 @@ export const App: FC = () => {
           }[] = json["Antal per dag region"];
           let [, ...headers] = Object.values(headerObject);
 
+          let rows: number[][] = dataObjects
+            .map(Object.values)
+            .map(([, ...row]) => row);
+
+          let rolling7 = rows.map((column, rowIndex) =>
+            column.map(
+              (value, colIndex) =>
+                rows
+                  .slice(rowIndex - 6, rowIndex + 1)
+                  .map((row) => row[colIndex])
+                  .reduce(sum, 0) / 7
+            )
+          );
+
           setHeaders(headers);
           setDates(dataObjects.map((obj) => obj.A.substr(0, 10)));
-          setRows(dataObjects.map(Object.values).map(([, ...row]) => row));
+          setRolling7(rolling7);
         },
         (error) => {
           setStatus(error.toString());
@@ -36,52 +51,86 @@ export const App: FC = () => {
     });
   }, []);
 
+  let yScale = 0.75;
+  let start = 210;
+  let sliced = rolling7.slice(start);
+
+  let yValues = Array.from({ length: 7 }).map((value, i) => (i + 1) * 100);
+
   return (
     <>
       <div className="status">{status}</div>
-      <div className="table">
-        {rows.map(tableRow)}
-        <span className="date" />
-        {headers.map(columnHeader)}
-      </div>
+      {selected === -1 ? (
+        <div className="table">
+          <span className="date" />
+          {headers.map(columnHeader)}
+          {sliced.map(tableRow)}
+          <span className="date" />
+          {headers.map(columnHeader)}
+        </div>
+      ) : (
+        <>
+          <button onClick={() => setSelected(-1)}>back</button>
+          <div>{headers[selected]}</div>
+          <div className="chart">
+            <div className="y-values">
+              {yValues.map((y) => (
+                <div className="y-value">{y}</div>
+              ))}
+            </div>
+            <svg viewBox="0 0 800 600">
+              {yValues.map((y) => (
+                <line x1="0" y1={y * yScale} x2="800" y2={y * yScale}></line>
+              ))}
+
+              <polyline
+                fill="none"
+                stroke="#c3227d"
+                points={sliced
+                  .map(
+                    (row: number[], rowIndex: number) =>
+                      (rowIndex * 800) / sliced.length +
+                      "," +
+                      (600 -
+                        (row[selected] / population[selected]) * 1e6 * yScale)
+                  )
+                  .join(" ")}
+              />
+            </svg>
+          </div>
+        </>
+      )}
     </>
   );
 
-  function columnHeader(header: string) {
-    return <span>{header}</span>;
+  function columnHeader(header: string, i: number) {
+    return <span onClick={() => setSelected(i)}>{header}</span>;
+  }
+
+  function tableCell(colIndex: number, rowIndex: number) {
+    let x = (sliced[rowIndex][colIndex] / population[colIndex]) * 1e6;
+
+    return <span className={color(x)}>{Math.round(x)}</span>;
+
+    function color(x: number) {
+      for (let i = 960; i >= 60; i /= 2) if (x > i) return "color" + i;
+      if (x > 20) return "color20";
+      if (x > 0) return "color1";
+      return "color0";
+    }
+  }
+
+  function sum(a: number, b: number) {
+    return a + b;
   }
 
   function tableRow(row: number[], rowIndex: number) {
     return (
       <>
-        <span className="date">{dates[rowIndex]}</span>
+        <span className="date">{dates.slice(start)[rowIndex]}</span>
         {row.map((value, colIndex) => tableCell(colIndex, rowIndex))}
       </>
     );
-
-    function tableCell(colIndex: number, rowIndex: number) {
-      let x =
-        (rows
-          .slice(rowIndex - 6, rowIndex + 1)
-          .map((row) => row[colIndex])
-          .reduce(sum, 0) /
-          population[colIndex] /
-          7) *
-        1e6;
-
-      return <span className={color(x)}>{Math.round(x)}</span>;
-
-      function sum(a: number, b: number) {
-        return a + b;
-      }
-
-      function color(x: number) {
-        for (let i = 960; i >= 60; i /= 2) if (x > i) return "color" + i;
-        if (x > 20) return "color20";
-        if (x > 0) return "color1";
-        return "color0";
-      }
-    }
   }
 };
 

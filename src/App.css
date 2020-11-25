@@ -8,6 +8,34 @@
   text-align: center;
 }
 
+.chart {
+  display: grid;
+  grid-template-columns: max-content auto;
+}
+
+.chart .y-values {
+  grid-column: 1;
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: space-evenly;
+  margin: 12px;
+}
+
+.chart svg {
+  grid-column: 2;
+  height: 600px;
+  border: black 2px solid;
+}
+
+.chart svg polyline {
+  stroke-width: 1.5;
+}
+
+.chart line {
+  stroke: #bbb;
+  stroke-width: 1;
+}
+
 .color0 {
   background-color: #67bfc6;
   color: white;
