@@ -11,7 +11,7 @@ export const App: FC = () => {
 
   useEffect(() => {
     setStatus("loading");
-    fetch("/.netlify/functions/fana").then(
+    fetch("/.netlify/functions/fauna").then(
       (faunaResp: Response): Promise<void> => {
         setStatus(`loaded ${faunaResp.ok}`);
         if (!faunaResp.ok) {
