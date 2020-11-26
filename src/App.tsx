@@ -11,44 +11,51 @@ export const App: FC = () => {
 
   useEffect(() => {
     setStatus("loading");
-    fetch("/.netlify/functions/fauna").then((faunaResp) => {
-      setStatus(`loaded ${faunaResp.ok}`);
-      if (!faunaResp.ok) {
-        return faunaResp.text().then((error) => {
-          setStatus(error.toString());
-        });
-      }
-
-      return faunaResp.json().then(
-        (json) => {
-          let [headerObject, ...dataObjects]: {
-            [col: string]: any;
-          }[] = json["Antal per dag region"];
-          let [, ...headers] = Object.values(headerObject);
-
-          let rows: number[][] = dataObjects
-            .map(Object.values)
-            .map(([, ...row]) => row);
-
-          let rolling7 = rows.map((column, rowIndex) =>
-            column.map(
-              (value, colIndex) =>
-                rows
-                  .slice(rowIndex - 6, rowIndex + 1)
-                  .map((row) => row[colIndex])
-                  .reduce(sum, 0) / 7
-            )
-          );
-
-          setHeaders(headers);
-          setDates(dataObjects.map((obj) => obj.A.substr(0, 10)));
-          setRolling7(rolling7);
-        },
-        (error) => {
-          setStatus(error.toString());
+    fetch("/.netlify/functions/fana").then(
+      (faunaResp: Response): Promise<void> => {
+        setStatus(`loaded ${faunaResp.ok}`);
+        if (!faunaResp.ok) {
+          return faunaResp.text().then((error: string): void => {
+            setStatus(error);
+          });
         }
-      );
-    });
+
+        return faunaResp.json().then(
+          (json: any): void => {
+            let [headerObject, ...dataObjects]: {
+              [col: string]: any;
+            }[] = json["Antal per dag region"];
+            let [, ...headers] = Object.values(headerObject);
+
+            let rows: number[][] = dataObjects
+              .map(Object.values)
+              .map(([, ...row]: number[]): number[] => row);
+
+            let rolling7 = rows.map(
+              (column: number[], rowIndex: number): number[] =>
+                column.map(
+                  (value: number, colIndex: number): number =>
+                    rows
+                      .slice(rowIndex - 6, rowIndex + 1)
+                      .map((row: number[]): number => row[colIndex])
+                      .reduce((a: number, b: number): number => a + b, 0) / 7
+                )
+            );
+
+            setHeaders(headers);
+            setDates(
+              dataObjects.map((obj: { [col: string]: any }): string =>
+                obj.A.substr(0, 10)
+              )
+            );
+            setRolling7(rolling7);
+          },
+          (error: any): void => {
+            setStatus(error.toString());
+          }
+        );
+      }
+    );
   }, []);
 
   let yScale = 0.75;
@@ -118,10 +125,6 @@ export const App: FC = () => {
       if (x > 0) return "color1";
       return "color0";
     }
-  }
-
-  function sum(a: number, b: number) {
-    return a + b;
   }
 
   function tableRow(row: number[], rowIndex: number) {
