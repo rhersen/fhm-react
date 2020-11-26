@@ -6,7 +6,7 @@ export const App: FC = () => {
   const [status, setStatus] = useState<string>("idle");
   const [headers, setHeaders] = useState<string[]>([]);
   const [dates, setDates] = useState<string[]>([]);
-  const [rolling7, setRolling7] = useState<number[][]>([]);
+  const [rows, setRows] = useState<number[][]>([]);
   const [selected, setSelected] = useState<number>(-1);
 
   useEffect(() => {
@@ -27,19 +27,10 @@ export const App: FC = () => {
             }[] = json["Antal per dag region"];
             let [, ...headers] = Object.values(headerObject);
 
-            let rows: number[][] = dataObjects
-              .map(Object.values)
-              .map(([, ...row]: number[]): number[] => row);
-
-            let rolling7 = rows.map(
-              (column: number[], rowIndex: number): number[] =>
-                column.map(
-                  (value: number, colIndex: number): number =>
-                    rows
-                      .slice(rowIndex - 6, rowIndex + 1)
-                      .map((row: number[]): number => row[colIndex])
-                      .reduce((a: number, b: number): number => a + b, 0) / 7
-                )
+            setRows(
+              dataObjects
+                .map(Object.values)
+                .map(([, ...row]: number[]): number[] => row)
             );
 
             setHeaders(headers);
@@ -48,7 +39,6 @@ export const App: FC = () => {
                 obj.A.substr(0, 10)
               )
             );
-            setRolling7(rolling7);
           },
           (error: any): void => {
             setStatus(error.toString());
@@ -59,10 +49,10 @@ export const App: FC = () => {
   }, []);
 
   let yScale = 0.75;
-  let start = 210;
-  let sliced = rolling7.slice(start);
-
   let yValues = Array.from({ length: 7 }).map((value, i) => (i + 1) * 100);
+
+  let f = (a: number[], pop: number) =>
+    (a.slice(-7).reduce((a, b) => a + b, 0) / 7 / pop) * 1e6;
 
   return (
     <>
@@ -71,7 +61,18 @@ export const App: FC = () => {
         <div className="table">
           <span className="date" />
           {headers.map(columnHeader)}
-          {sliced.map(tableRow)}
+          {rows.map((row: number[], rowIndex: number) => (
+            <>
+              <span className="date">{dates[rowIndex]}</span>
+              {row.map((value, colIndex) => {
+                let a = rows
+                  .slice(rowIndex - 13, rowIndex + 1)
+                  .map((row) => row[colIndex]);
+                  let x = f(a, population[colIndex]);
+                return <span className={color(x)}>{Math.round(x)}</span>;
+              })}
+            </>
+          ))}
           <span className="date" />
           {headers.map(columnHeader)}
         </div>
@@ -93,10 +94,10 @@ export const App: FC = () => {
               <polyline
                 fill="none"
                 stroke="#c3227d"
-                points={sliced
+                points={rows
                   .map(
                     (row: number[], rowIndex: number) =>
-                      (rowIndex * 800) / sliced.length +
+                      (rowIndex * 800) / rows.length +
                       "," +
                       (600 -
                         (row[selected] / population[selected]) * 1e6 * yScale)
@@ -114,26 +115,11 @@ export const App: FC = () => {
     return <span onClick={() => setSelected(i)}>{header}</span>;
   }
 
-  function tableCell(colIndex: number, rowIndex: number) {
-    let x = (sliced[rowIndex][colIndex] / population[colIndex]) * 1e6;
-
-    return <span className={color(x)}>{Math.round(x)}</span>;
-
-    function color(x: number) {
-      for (let i = 960; i >= 60; i /= 2) if (x > i) return "color" + i;
-      if (x > 20) return "color20";
-      if (x > 0) return "color1";
-      return "color0";
-    }
-  }
-
-  function tableRow(row: number[], rowIndex: number) {
-    return (
-      <>
-        <span className="date">{dates.slice(start)[rowIndex]}</span>
-        {row.map((value, colIndex) => tableCell(colIndex, rowIndex))}
-      </>
-    );
+  function color(x: number) {
+    for (let i = 960; i >= 60; i /= 2) if (x > i) return "color" + i;
+    if (x > 20) return "color20";
+    if (x > 0) return "color1";
+    return "color0";
   }
 };
 
