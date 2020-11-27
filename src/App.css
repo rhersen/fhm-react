@@ -41,6 +41,42 @@
   color: white;
 }
 
+.color-70 {
+  background-color: #006fb2;
+  color: white;
+}
+
+.color-50 {
+  background-color: #2296ca;
+  color: white;
+}
+
+.color-30 {
+  background-color: #6fbfd9;
+}
+
+.color-10 {
+  background-color: #a9d8ec;
+}
+
+.color10 {
+  background-color: #febfa6;
+}
+
+.color30 {
+  background-color: #ff8d6e;
+}
+
+.color50 {
+  background-color: #f0484e;
+  color: white;
+}
+
+.color70 {
+  background-color: #bf0336;
+  color: white;
+}
+
 .color1 {
   background-color: #f5d664;
 }

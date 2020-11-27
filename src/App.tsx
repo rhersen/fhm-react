@@ -51,8 +51,11 @@ export const App: FC = () => {
   let yScale = 0.75;
   let yValues = Array.from({ length: 7 }).map((value, i) => (i + 1) * 100);
 
-  let f = (a: number[], pop: number) =>
-    (a.slice(-7).reduce((a, b) => a + b, 0) / 7 / pop) * 1e6;
+  let f = (a: number[]) => {
+    let prev = a.slice(0, 7).reduce((a, b) => a + b, 0);
+    let curr = a.slice(-7).reduce((a, b) => a + b, 0);
+    return (100 * (curr - prev)) / prev;
+  };
 
   return (
     <>
@@ -68,8 +71,8 @@ export const App: FC = () => {
                 let a = rows
                   .slice(rowIndex - 13, rowIndex + 1)
                   .map((row) => row[colIndex]);
-                  let x = f(a, population[colIndex]);
-                return <span className={color(x)}>{Math.round(x)}</span>;
+                let x = f(a);
+                return <span className={color(x)}>{Math.round(x)}%</span>;
               })}
             </>
           ))}
@@ -116,10 +119,8 @@ export const App: FC = () => {
   }
 
   function color(x: number) {
-    for (let i = 960; i >= 60; i /= 2) if (x > i) return "color" + i;
-    if (x > 20) return "color20";
-    if (x > 0) return "color1";
-    return "color0";
+    for (let i = -60; i <= 60; i += 20) if (x < i) return "color" + (i - 10);
+    return "color70";
   }
 };
 
