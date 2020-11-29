@@ -53,6 +53,7 @@ export const App: FC = () => {
 
   let f = (a: number[]) => {
     let prev = a.slice(0, 7).reduce((a, b) => a + b, 0);
+    if (prev === 0) return undefined;
     let curr = a.slice(-7).reduce((a, b) => a + b, 0);
     return (100 * (curr - prev)) / prev;
   };
@@ -72,6 +73,7 @@ export const App: FC = () => {
                   .slice(rowIndex - 13, rowIndex + 1)
                   .map((row) => row[colIndex]);
                 let x = f(a);
+                if (x === undefined) return <span> </span>;
                 return <span className={color(x)}>{Math.round(x)}%</span>;
               })}
             </>
